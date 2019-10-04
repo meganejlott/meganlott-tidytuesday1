@@ -2,18 +2,10 @@
 title: "Tidy Tuesday 1"
 author: "Megan Lott"
 date: "October 3, 2019"
-output: html_document
+output:
+ rmdformats::readthedown:
+    highlight: kate
 ---
-
-**Motivation** 
-
-For this Tidy Tuesday, I would like to learn how to plot the Pizza Rating data to a map. I have been in need of building a map to display my water quality data in Florida. I will focus here on visualizing the Pizza Ratings in to help as a jumping off point for future map-making. 
-
-To begin, I have been referencing a few resources for map-building, including: 
-
-1. [R Graph Gallery](https://www.r-graph-gallery.com/), particularly the post on [Bubble maps with ggplot2](Bubble map with ggplot2)
-2. [R Vingettes](https://cran.r-project.org/web/packages/ggfortify/vignettes/plot_map.html)
-
 
 ```{r load libraries}
 
@@ -28,10 +20,24 @@ library(ggmap)
 library(dplyr)
 library(viridis) #color palette
 library(plotly)
-
+library(rmdformats)
+library(knitr)
 ```
 
+#Motivation
 
+For this Tidy Tuesday, I would like to learn how to plot the Pizza Rating data to a map. I have been in need of building a map to display my water quality data in Florida. I will focus here on visualizing the Pizza Ratings in to help as a jumping off point for future map-making. 
+
+#References 
+This week's data is from [Jared Lander](https://twitter.com/jaredlander/status/1178122846419193858?s=20) and [Barstool Sports](https://twitter.com/jaredlander/status/1178122846419193858?s=20) via Tyler Richards.
+
+To begin, I have been referencing a few resources for map-building, including: 
+
+1. [R Graph Gallery](https://www.r-graph-gallery.com/), particularly the post on [Bubble maps with ggplot2](Bubble map with ggplot2)
+2. [R Vingettes](https://cran.r-project.org/web/packages/ggfortify/vignettes/plot_map.html)
+
+
+#Data 
 ```{r load data}
 
 pizza_jared <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_jared.csv")
@@ -42,7 +48,6 @@ pizza_raw <- read_csv("https://raw.githubusercontent.com/tylerjrichards/Barstool
 ```
 
 The cleaning script here has some bugs, so I skipped it, and used my own.
-
 
 ```{r data cleaning}
 
@@ -58,7 +63,9 @@ pizza_cleaned = pizza_barstool %>%
   filter(!is.na(long)) 
 ```
 
-Side question - are there shops here with the same name?
+#Exploratoring the Data
+##Chains
+Question: Are there shops here with the same name?
 
 ```{r}
 
@@ -79,6 +86,7 @@ pizza_chains = pizza_barstool %>%
 
 There are 452 pizza shows with unique names. This means there are 11 shops that have duplicated a name from another shop. What names have been re-used? Are these duplicates or chains?
 
+##Locations
 
 Now, let's look and see where these pizza shops are located. 
 
@@ -93,9 +101,11 @@ pizza_shops_city = pizza_barstool %>%
 pizza_shops_city
 
 ```
+
 Top Ten Density: The cities with the most number of pizza shops included in this study were: New York, Brooklyn, Boston, Las Vegas, Minneapolis, Atlanta, Chicago, Columbus, Hoboken, and Nantucket. 
 
 
+##John's on 44th
 
 As a NY Native, Joe says that John's on 44th has the best pizza. Looking through the shops in NYC, he must be referring to John's of Times Square. How does this compare to the average pizza ratings in NYC? 
 
@@ -124,8 +134,8 @@ row.names(johns_compared)[2]<-"NYC Average"
 ```
 
 
-
-**BUBBLE MAP**
+#Visualizing Data using Maps
+##Bubble Maps
 As input you need:
 
 1. a list of GPS coordinates (longitude and latitude of the places you want to represent) CHECK! We will use the long and lat data in the pizza_cooked df. 
@@ -191,10 +201,10 @@ ggplotly(ny_pizza_plot)
 
 
 
-**Chloropleth Map**
+##Chloropleth Maps
 
 
-Building a chloropleth map 
+Building a chloropleth Map 
 
 A choropleth map uses the color of each region in the plot to display some value associated with the region. 
 
@@ -238,29 +248,18 @@ class(map_us)
 
 ```
 
-
-```{r}
-
-pizza_barstool %>%
-  filter(city == "New York") %>%
-  ggplot() + 
-  geom_point(aes(x = review_stats_all_average_score, y = price_level))
-
-```
-
+From RStudio Primer:
 
 Building a chloropleth map will require some data wrangling. We want to ensure that a commo set of region names appears across both data sets.
 
-Initialize a plot with the data set that contains your data. Here that is USArrests2.
-
 Add geom_map(). Set the map_id aesthetic to the variable that contains the regions names. Then set the fill aesthetic to the fill variable. You do not need to supply x and y aesthetics, geom_map() will derive these values from the map data set, which you must set with the map parameter. Since map is a parameter, it should go outside the aes() function.
 
-Dfollow geom_map() with expand_limits(), and tell expand_limits() what the x and y variables in the map dataset are. This shouldn’t be necessary in future iterations of geom_map(), but for now ggplot2 will use the x and y arguments of expand_limits() to build the bounding box for your plot.
+Follow geom_map() with expand_limits(), and tell expand_limits() what the x and y variables in the map dataset are. This shouldn’t be necessary in future iterations of geom_map(), but for now ggplot2 will use the x and y arguments of expand_limits() to build the bounding box for your plot.
 
 Avoid distortions by adding coord_map() to your plot. coord_map() displays the plot in a fixed cartographic projection.You must first load mapproj package.
 
 
-**Additional Notes** 
+#Additional Notes
 
 - For this TidyTuesday exercise, I tried to use Snazzy Maps, but this application requires a paid account.
 - Maps from Google require an API Key. These seem to require a paid membership. Are there alternatives availible?
